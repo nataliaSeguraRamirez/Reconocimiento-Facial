@@ -19,6 +19,7 @@ import tkinter
 
 
 def menu_pantalla():
+    entrenandoRF()
     global ventana
     ventana= tkinter.Tk()
     ventana.geometry("400x420")
@@ -62,7 +63,7 @@ def registro():
 def capturandoRostros():
     pantalla2.destroy()
     personName = name.get()
-    dataPath = "D:/Downloads/prueba_reco/prueba_reco/data" #Cambia a la ruta donde hayas almacenado Data
+    dataPath = "C:\\Users\\davii\\OneDrive\\Documents\\machine learning\\reconocimiento_facial\\data"
     personPath = dataPath + '/' + personName
     
     if not os.path.exists(personPath):
@@ -102,7 +103,7 @@ def capturandoRostros():
     
 
 def entrenandoRF():
-    dataPath = 'D:/Downloads/prueba_reco/prueba_reco/data' #Cambia a la ruta donde hayas almacenado Data
+    dataPath = "C:\\Users\\davii\\OneDrive\\Documents\\machine learning\\reconocimiento_facial\\data"#Cambia a la ruta donde hayas almacenado Data
     peopleList = os.listdir(dataPath)
     print('Lista de personas: ', peopleList)
     
@@ -124,7 +125,7 @@ def entrenandoRF():
     	label = label + 1
         
     # Métodos para entrenar el reconocedor
-    face_recognizer = cv2.face.EigenFaceRecognizer_create()
+    face_recognizer = cv2.face.LBPHFaceRecognizer_create()
     
     # Entrenando el reconocedor de rostros
     print("Entrenando...")
@@ -134,13 +135,30 @@ def entrenandoRF():
     face_recognizer.write('modeloEigenFace.xml')
     print("Modelo almacenado...")
     
+def NuevoUsuario():
+    global ventana1
+    ventana1= tkinter.Tk()
+    ventana1.geometry("400x420")
+    ventana1.title("Bienvenidos-UAM")
+    ventana1.iconbitmap("logo.ico")
+    
+    image=tkinter.PhotoImage(file="logos_uam.gif")
+    image=image.subsample(2,2)
+    tkinter.Label(ventana,image=image).pack()
+    etiqueta = tkinter.Label(ventana1, text="Registrate!", bg="navy", fg="White", width="400", height="3", font=("calibri",15))
+    etiqueta.pack() 
+    tkinter.Label(ventana1).pack()
+    
+    botonR = tkinter.Button(ventana1, text="Registar Usuario",bg="deepskyblue", fg="White", width="30", height="3", command=registro)
+    botonR.pack()
+    ventana1.mainloop()
 
 def reconocimiento_facial():
-    dataPath = "D:/Downloads/prueba_reco/prueba_reco/data" #Cambia a la ruta donde hayas almacenado Data
+    dataPath = "C:\\Users\\davii\\OneDrive\\Documents\\machine learning\\reconocimiento_facial\\data" #Cambia a la ruta donde hayas almacenado Data
     imagePaths = os.listdir(dataPath)
     print('imagePaths=',imagePaths)
     
-    face_recognizer = cv2.face.EigenFaceRecognizer_create()
+    face_recognizer = cv2.face.LBPHFaceRecognizer_create()
     
     # Leyendo el modelo
     face_recognizer.read('modeloEigenFace.xml')
@@ -151,38 +169,36 @@ def reconocimiento_facial():
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades+'haarcascade_frontalface_default.xml')
     
     while True:
-    	ret,frame = cap.read()
-    	if ret == False: break
-    	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    	auxFrame = gray.copy()
-    
-    	faces = face_cascade.detectMultiScale(gray,1.3,5)
-    
-    	for (x,y,w,h) in faces:
-    		rostro = auxFrame[y:y+h,x:x+w]
-    		rostro = cv2.resize(rostro,(150,150),interpolation= cv2.INTER_CUBIC)
-    		result = face_recognizer.predict(rostro)
-    
-    		cv2.putText(frame,'{}'.format(result),(x,y-5),1,1.3,(255,255,0),1,cv2.LINE_AA)
-    		
-    		# EigenFaces
-    		if result[1] < 3500:
-    			cv2.putText(frame,'{}'.format(imagePaths[result[0]]),(x,y-25),2,1.1,(41,145,229),1,cv2.LINE_AA)
-    			cv2.circle(frame, (x+110,y+130),130,(41,145,229),2)
-            elif result[1] < 5200:
-    			cv2.putText(frame,'{}'.format(imagePaths[result[0]]),(x,y-25),2,1.1,(41,145,229),1,cv2.LINE_AA)
-    			cv2.circle(frame, (x+110,y+130),130,(41,145,229),2)
-    		else:
-    			cv2.putText(frame,'Desconocido',(x,y-20),2,0.8,(153,70,225),1,cv2.LINE_AA)
-    			cv2.rectangle(frame, (x,y),(x+w,y+h),(153,70,225),2)
-    		
-    	cv2.imshow('frame',frame)
-    	k = cv2.waitKey(1)
-    	if k == 27:
-    		break
-    
+        ret,frame = cap.read()
+        if ret == False: break
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        auxFrame = gray.copy()
+        
+        faces = face_cascade.detectMultiScale(gray,1.3,5)
+        
+        for (x,y,w,h) in faces:
+            rostro = auxFrame[y:y+h,x:x+w]
+            rostro = cv2.resize(rostro,(150,150),interpolation= cv2.INTER_CUBIC)
+            result = face_recognizer.predict(rostro)
+            print(result)
+            cv2.putText(frame,'{}'.format(result),(x,y-5),1,1.3,(255,255,0),1,cv2.LINE_AA)
+            
+            if result[1] < 70: 
+                cv2.putText(frame,'{}'.format("Bienvenido "+imagePaths[result[0]]),(x,y-25),2,1.1,(41,145,229),1,cv2.LINE_AA) 
+                cv2.circle(frame, (x+110,y+130),130,(41,145,229),2)
+                
+            else:
+                cv2.putText(frame,'Desconocido',(x,y-20),2,0.8,(0,0,255),1,cv2.LINE_AA)
+                cv2.rectangle(frame, (x,y),(x+w,y+h),(0,0,255),2)
+                NuevoUsuario()
+        cv2.imshow('frame',frame)
+        k = cv2.waitKey(1)
+        if k == 27:
+            break
+
     cap.release()
     cv2.destroyAllWindows()
+
     
     
 menu_pantalla()
